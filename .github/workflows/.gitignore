@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+*.py[cod]
+#Data and models
+data/
+*.csv
+*.json
+*.txt
+*.yaml
+*.yml
+*.jsonl
+*.jsonl.gz
+*.jsonl.bz2
+*.jsonl.xz
+*.jsonl.lzma
+*.jsonl.lz4
+*.jsonl.zstd
+*.pth
+*.onnx
+*.h5
+
+#OS Generated files
+.DS_Store
+Thumbs.db
