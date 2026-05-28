@@ -12,7 +12,14 @@ def create_tables(): #Data structure here:
     )
     """)
     #Create CVE table
-
+    cursor.execute(""" 
+    CREATE TABLE IF NOT EXISTS cves (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cve_id TEXT UNIQUE,
+    description TEXT,
+    severity TEXT
+    )
+    """)
     #Create Version table
     cursor.execute(""" 
     CREATE TABLE IF NOT EXISTS versions (
@@ -28,7 +35,18 @@ def create_tables(): #Data structure here:
     if "version" not in version_columns:
         cursor.execute("ALTER TABLE versions ADD COLUMN version TEXT")
     #Create mapping table
+    cursor.execute(""" 
+    CREATE TABLE IF NOT EXISTS version_cves (
+    version_id INTEGER,
+    cve_id INTEGER,
+    
+    FOREIGN KEY (version_id)
+    REFERENCES versions(id),
 
+    FOREIGN KEY (cve_id)
+    REFERENCES cves(id)
+    )
+    """)
     #Commit changes
     conn.commit()
     #Close connection
@@ -48,10 +66,16 @@ def add_software(name):  #Pass name here
     #Close connection
     conn.close()
 
-def add_cve(cve_id, description, severity):
-    #Details go here
+def add_cve(cve_id, description, severity): #Details go here
+    conn = sqlite3.connect("vulns.db")
+    cursor = conn.cursor()
+    cursor.execute(""" 
+    INSERT OR IGNORE INTO cves (cve_id, description, severity)
+    VALUES (?, ?, ?)
+    """, (cve_id, description, severity))    
     
-    pass
+    conn.commit()
+    conn.close()
 
 def add_version(software_name, version):  #Add a version to software in question
     #Connect to database
@@ -82,18 +106,47 @@ def add_version(software_name, version):  #Add a version to software in question
     #Close connection
     conn.close()
 
-def link_cve_to_version():
-    #Associate specific vulnerabilities to particular versions of software for better security mitigation
+def link_cve_to_version(version_id, cve_id):  #Associate specific vulnerabilities to particular versions of software for better security mitigation
+    conn = sqlite3.connect("vulns.db")
+    cursor = conn.cursor()
+    cursor.execute(""" 
+    INSERT INTO version_cves (
+    version_id,
+    cve_id
+    )
+    VALUES (?, ?)
+    """, (version_id, cve_id))
 
-    pass
+    conn.commit()
+    conn.close()
 
 def get_vulnerabilities(): #Will most likely be called in main.py as orchestrator function, Extract the associated vulnerabilities from any software version
     #Connect to database
-
+    conn = sqlite3.connect("vulns.db")
+    cursor = conn.cursor()
     #JOIN Tables
+    cursor.execute(""" 
+    SELECT
+        software.name,
+        versions.version,
+        cves.cve_id
+        cves.severity
+
+    FROM version_cves
+
+    JOIN versions
+    ON version_cves.version_id = versions.id
+
+    JOIN software
+    ON versions.software_id = software.id
+
+    JOIN cves
+    ON version_cves.cve_id = cves.id
+
+    """)
 
     #Fetch rows
-
+    results = cursor.fetchall()
+    conn.close()
     #return results
-
-    pass
+    return results
