@@ -44,3 +44,22 @@ def build_transformed_dataframe(df):
     #Convert the result into Dataframe
     feature_df = pd.DataFrame(List)
     return feature_df
+
+#load csv into dataframe
+list = ["password", "cat", "hello123", "abc", "hunter22"]
+dframe = pd.DataFrame(list, columns=["password"])
+#create separate column for password length
+lengths = []
+for p in dframe["password"]:
+    lengths.append(len(p))
+
+dframe["length"] = lengths
+#group dataframe by password length
+
+#Count row in each group
+
+#sort counts in descending order
+
+#Display results
+
+
